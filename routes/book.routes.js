@@ -70,6 +70,19 @@ router.post("/books/:bookId/edit", (req, res, next) => {
       });
   });
 
+//DELETE
+router.post("/books/:bookId/delete", (req, res, next) => {
+    Book.findByIdAndDelete(req.params.bookId)
+      .then(() => {
+        res.redirect("/books");
+      })
+      .catch(err => {
+        console.log("Error deleting book...", err);
+        next();
+      });
+  
+  });
+
 // book details
 router.get('/books/:bookId', (req, res, next) => {
     const id = req.params.bookId;
