@@ -1,11 +1,13 @@
 const { render } = require("../app");
 const Book = require("../models/Book.model");
+const Author = require('../models/Author.model')
 
 const router = require("express").Router();
 
 // list all books
 router.get("/books", (req, res, next) => {
   Book.find()
+  .populate('author')
   .then( booksFromDB => {
     res.render('books/books-list', {books: booksFromDB})
   })
