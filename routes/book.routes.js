@@ -17,6 +17,7 @@ router.get("/books", (req, res, next) => {
   })
 });
 
+
 //CREATE: display form
 router.get('/books/create', (req, res, next) => {
     res.render('books/book-create');
@@ -43,6 +44,7 @@ router.post('/books/create', (req, res, next) => {
 //UPDATE: display form
 router.get('/books/:bookId/edit', (req, res, next) => {
     Book.findById(req.params.bookId)
+    .populate('author')
     .then((bookDetails) => {
         res.render('books/book-edit', bookDetails);
     })
@@ -85,19 +87,19 @@ router.post("/books/:bookId/delete", (req, res, next) => {
   
   });
 
-// book details
-router.get('/books/:bookId', (req, res, next) => {
-    const id = req.params.bookId;
+//READ: Book details
+router.get("/books/:bookId", (req, res, next) => {
+  const id = req.params.bookId;
 
-    Book.findById(id)
-        .then(bookDetails => {
-            res.render("books/book-details", bookDetails);
-        })
-        .catch( err => {
-            console.log('error getting book details from DB', err);
-            next();
-        })
-//    res.send(`displaying details for book with id... ${id}`)
+  Book.findById(id)
+    .populate("author")
+    .then( bookDetails => {
+      res.render("books/book-details", bookDetails);
+    } )
+    .catch( err => {
+      console.log("error getting book details from DB", err);
+      next();
+    })
 });
 
 module.exports = router;
