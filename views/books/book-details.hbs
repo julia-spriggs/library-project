@@ -1,18 +1,26 @@
 <section class="book-details">
     <h2>{{title}}</h2>
+
     <p>
-        Author: {{author.name}} <br />
-        Rating: {{rating}} <br />
+        <strong>Author:</strong> <br />
+        {{author.name}} <br />
+        {{author.age}} <br />
+        {{author.country}} <br />
+    </p>
+    <p>
+        <strong>Rating: </strong> {{rating}} <br />
     </p>
     <p>
         <strong>Description:</strong>
         {{description}}
     </p>
-</section>
 
-<a href="/books/{{_id}}/edit">Edit this book</a>
+    <p>
         <form action="/books/{{_id}}/delete" method="POST">
             <button>Delete</button>
         </form>
+    </p>
+
+</section>
 
 <a href="/books">Back</a>

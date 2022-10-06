@@ -21,18 +21,26 @@ require("./config")(app);
 //config sessions
 require('./config/session.config')(app);
 
+const isLoggedIn = require("./middleware/isLoggedIn")
+
 // default value for title local
 const capitalized = require("./utils/capitalized");
 const projectName = "library-project";
 
 app.locals.appTitle = `${capitalized(projectName)} created with IronLauncher`;
 
-// 👇 Start handling routes here
+app.use( (req, res, next) => {
+    res.locals.userInSession = req.session.currentUser;
+    next();
+});
 
+
+
+// 👇 Start handling routes here
 app.use("/", require("./routes/index.routes"));
 app.use("/", require("./routes/auth.routes"));
 app.use("/", require("./routes/book.routes"))
-app.use("/",  require("./routes/author.routes"))
+app.use("/", isLoggedIn, require("./routes/author.routes"))
 
 
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes

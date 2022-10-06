@@ -1,4 +1,5 @@
 const bcryptjs = require("bcryptjs");
+const mongoose = require("mongoose");
 const User = require("../models/User.model");
 
 const router = require("express").Router();
@@ -11,11 +12,16 @@ router.get("/signup", (req, res, next) => {
 });
 
 
-
 //SIGNUP: process form
 router.post("/signup", (req, res, next) => {
+
     const {email, password} = req.body;
 
+    const regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
+    if (!regex.test(password)) {
+      res.status(400).render('auth/signup', { errorMessage: 'Password needs to have at least 6 chars and must contain at least one number, one lowercase and one uppercase letter.' });
+      return;
+    }
 
     bcryptjs
         .genSalt(saltRounds)
@@ -27,19 +33,27 @@ router.post("/signup", (req, res, next) => {
                 email,
                 passwordHash: hash
             }
+            
             return User.create(userDetails);
         })
         .then(userFromDB => {
             res.redirect("/");
         })
         .catch(e => {
-            console.log("error creating user account", e)
-            next(e);
+            if (e instanceof mongoose.Error.ValidationError) {
+                res.status(400).render('auth/signup', { errorMessage: e.message });
+            } else if (e.code === 11000) {
+                res.status(400).render('auth/signup', { errorMessage: "Email already in use" });
+            } else {
+                next(e);
+            }
         });
 });
 
+
 //LOGIN: display form
 router.get('/login', (req, res) => res.render('auth/login'));
+
 
 //LOGIN: process form
 router.post("/login", (req, res, next) => {
@@ -51,30 +65,32 @@ router.post("/login", (req, res, next) => {
     }
 
     User.findOne({email: email})
-    .then( userFromDB => {
-        if(!userFromDB){
-            //user does not exist
-            res.render('auth/login', { errorMessage: 'Email is not registered. Try with other email.' });
-            return;
-        } else if (bcryptjs.compareSync(password, userFromDB.passwordHash)) {
-            //login sucessful
-            req.session.currentUser = userFromDB;
-            res.render('users/user-profile', { userInSession: req.session.currentUser });
-        } else {
-            //login failed
-            res.render('auth/login', { errorMessage: 'Incorrect credentials.' });
-        }
-    })
-    .catch(error => {
-        console.log("Error trying to login", error)
-        next(error);
-    });
+        .then( userFromDB => {
+            if(!userFromDB){
+                //user does not exist
+                res.render('auth/login', { errorMessage: 'Email is not registered. Try with other email.' });
+                return;
+            } else if (bcryptjs.compareSync(password, userFromDB.passwordHash)) {
+                //login sucessful
+                req.session.currentUser = userFromDB;
+                res.redirect("/user-profile");
+            } else {
+                //login failed
+                res.render('auth/login', { errorMessage: 'Incorrect credentials.' });
+            }
+        })
+        .catch(error => {
+            console.log("Error trying to login", error)
+            next(error);
+        });
 });
+
 
 //USER-PROFILE
 router.get('/user-profile', (req, res) => {
-    res.render('users/user-profile', { userInSession: req.session.currentUser });
+    res.render('users/user-profile');
 });
+
 
 //LOGOUT
 router.post('/logout', (req, res, next) => {
@@ -86,6 +102,5 @@ router.post('/logout', (req, res, next) => {
         }
     });
 });
-
 
 module.exports = router;

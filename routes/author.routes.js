@@ -18,14 +18,14 @@ router.get("/authors", (req, res, next) => {
 
 
 //CREATE: display form
-router.get("/authors/create", (req, res, next) => {
+router.get("/authors/create", isLoggedIn, (req, res, next) => {
   res.render("authors/author-create");
 });
 
 
 
 //CREATE: process form
-router.post("/authors/create", (req, res, next) => {
+router.post("/authors/create", isLoggedIn, (req, res, next) => {
   
   const authorDetails = {
     name: req.body.name,
