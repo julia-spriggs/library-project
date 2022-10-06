@@ -71,9 +71,21 @@ router.post("/login", (req, res, next) => {
     });
 });
 
-
+//USER-PROFILE
 router.get('/user-profile', (req, res) => {
-res.render('users/user-profile', { userInSession: req.session.currentUser });
+    res.render('users/user-profile', { userInSession: req.session.currentUser });
 });
+
+//LOGOUT
+router.post('/logout', (req, res, next) => {
+    req.session.destroy(err => {
+        if (err) {
+            next(err);
+        } else {
+            res.redirect('/');
+        }
+    });
+});
+
 
 module.exports = router;
