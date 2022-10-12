@@ -1,5 +1,7 @@
 const Author = require("../models/Author.model");
 
+const isLoggedIn = require("../middleware/isLoggedIn");
+
 const router = require("express").Router();
 
 
